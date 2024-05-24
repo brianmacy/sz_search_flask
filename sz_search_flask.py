@@ -33,7 +33,8 @@ def do_search():
         user_flags = request.args.get('flags').split('|')
         flags = int(G2EngineFlags.combine_flags(user_flags))
     task = executor.submit(process_search, engine, user_request, flags)
-    return jsonify({'request':user_request,'response':task.result()})
+    return task.result()
+    #return jsonify({'request':user_request,'response':task.result()})
 
 
 try:
