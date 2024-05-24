@@ -17,7 +17,7 @@ app = Flask(__name__)
 def process_search(engine, search_json, engine_flags):
     try:
         response = bytearray()
-        engine.searchByAttributesV3( search_json, 'SEARCH', response, G2EngineFlags.G2_SEARCH_INCLUDE_RESOLVED | G2EngineFlags.G2_SEARCH_INCLUDE_FEATURE_SCORES | G2EngineFlags.G2_ENTITY_INCLUDE_RECORD_DATA| G2EngineFlags.G2_SEARCH_INCLUDE_POSSIBLY_SAME)
+        engine.searchByAttributesV3( search_json, 'SEARCH', response, engine_flags )
         return response.decode()
     except Exception as err:
         print(f"{err} [{search_json}]", file=sys.stderr)
@@ -39,17 +39,6 @@ def do_search():
 
 try:
   with app.app_context():
-    #parser = argparse.ArgumentParser()
-    #parser.add_argument(
-    #    "-t",
-    #    "--debugTrace",
-    #    dest="debugTrace",
-    #    action="store_true",
-    #    default=False,
-    #    help="output debug trace information",
-    #)
-    #args = parser.parse_args()
-
     engine_config = os.getenv("SENZING_ENGINE_CONFIGURATION_JSON")
     if not engine_config:
         print(
@@ -64,7 +53,7 @@ try:
 
     # Initialize the G2Engine
     engine = G2Engine()
-    engine.init("sz_search_perftest", engine_config, False) #args.debugTrace)
+    engine.init("sz_search_perftest", engine_config, False)
     engine.primeEngine()
 
     max_workers = int(os.getenv("SENZING_THREADS_PER_PROCESS", 0))
@@ -75,4 +64,4 @@ try:
 except Exception as err:
     print(err, file=sys.stderr)
     exit(-1)
-    
+
