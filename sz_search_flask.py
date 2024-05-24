@@ -65,3 +65,7 @@ except Exception as err:
     print(err, file=sys.stderr)
     exit(-1)
 
+if __name__ == '__main__':
+    app.run(debug=False,host='0.0.0.0',port=5000,threaded=True)
+
+
