@@ -21,6 +21,8 @@ def process_line(url, line):
         record = orjson.loads(line.encode())
         startTime = timer()
         response = requests.post(url, data=line)
+        if response.status_code != 200:
+            print(f'[{response.status_code}] {response.text}')
         return (timer()-startTime,record["RECORD_ID"])
     except Exception as err:
         print(f"{err} [{line}]", file=sys.stderr)

@@ -14,10 +14,10 @@ engine = None
 
 app = Flask(__name__)
 
-def process_search(engine, search_json, engine_flags):
+def process_search(engine, search_json, engine_flags, profile):
     try:
         response = bytearray()
-        engine.searchByAttributesV3( search_json, 'SEARCH', response, engine_flags )
+        engine.searchByAttributesV3( search_json, profile, response, flags=engine_flags )
         return response.decode()
     except Exception as err:
         print(f"{err} [{search_json}]", file=sys.stderr)
@@ -32,9 +32,11 @@ def do_search():
     if request.args.get('flags'):
         user_flags = request.args.get('flags').split('|')
         flags = int(G2EngineFlags.combine_flags(user_flags))
-    task = executor.submit(process_search, engine, user_request, flags)
-    return task.result()
-    #return jsonify({'request':user_request,'response':task.result()})
+    try:
+        task = executor.submit(process_search, engine, user_request, flags, request.args.get('profile'))
+        return task.result()
+    except Exception as err:
+        return jsonify({'error':str(err)}), 500
 
 
 try:
