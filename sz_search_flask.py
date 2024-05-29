@@ -9,10 +9,34 @@ import os
 
 from senzing import G2Engine, G2Exception, G2EngineFlags, G2Diagnostic
 
+exceptions = {
+        "ExceptionCode":500,
+        "ExceptionMessage":500,
+        "G2BadInputException":400,
+        "G2ConfigurationException":400,
+        "G2DatabaseConnectionLostException":500,
+        "G2DatabaseException":500,
+        "G2Exception":500,
+        "G2LicenseException":500,
+        "G2NotFoundException":404,
+        "G2NotInitializedException":500,
+        "G2RetryTimeoutExceededException":408,
+        "G2RetryableException":500,
+        "G2UnhandledException":500,
+        "G2UnknownDatasourceException":400,
+        "G2UnrecoverableException":500,
+        "TranslateG2ModuleException":500
+        }
+
 executor = None
 engine = None
 
 app = Flask(__name__)
+
+def exceptionToCode(err):
+    if type(err).__name__ in exceptions:
+        return exceptions[type(err).__name__]
+    return 500
 
 def process_search(engine, search_json, engine_flags, profile):
     try:
@@ -36,7 +60,7 @@ def do_search():
         task = executor.submit(process_search, engine, user_request, flags, request.args.get('profile'))
         return task.result()
     except Exception as err:
-        return jsonify({'error':str(err)}), 500
+        return jsonify({'error':str(err)}), exceptionToCode(err)
 
 
 try:
@@ -44,10 +68,7 @@ try:
     engine_config = os.getenv("SENZING_ENGINE_CONFIGURATION_JSON")
     if not engine_config:
         print(
-            "The environment variable SENZING_ENGINE_CONFIGURATION_JSON must be set with a proper JSON configuration.",
-            file=sys.stderr,
-        )
-        print(
+            "The environment variable SENZING_ENGINE_CONFIGURATION_JSON must be set with a proper JSON configuration.\n",
             "Please see https://senzing.zendesk.com/hc/en-us/articles/360038774134-G2Module-Configuration-and-the-Senzing-API",
             file=sys.stderr,
         )
@@ -69,5 +90,4 @@ except Exception as err:
 
 if __name__ == '__main__':
     app.run(debug=False,host='0.0.0.0',port=5000,threaded=True)
-
 
