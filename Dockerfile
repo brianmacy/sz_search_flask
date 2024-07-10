@@ -1,15 +1,17 @@
 # docker build -t brian/sz_search_flask .
 # docker run --user $UID -it -v $PWD:/data -e SENZING_ENGINE_CONFIGURATION_JSON brian/sz_search_flask /dev/null
 
-ARG BASE_IMAGE=senzing/senzingapi-runtime:staging
+ARG BASE_IMAGE=senzing/senzingapi-runtime:latest
 FROM ${BASE_IMAGE}
 
 LABEL Name="brain/sz_search_flask" \
       Maintainer="brianmacy@gmail.com" \
       Version="DEV"
 
+USER root
+
 RUN apt-get update \
- && apt-get -y install python3 python3-pip \
+ && apt-get -y install python3 python3-pip python3-flask \
  && python3 -mpip install orjson \
  && apt-get -y remove build-essential python3-pip \
  && apt-get -y autoremove \
